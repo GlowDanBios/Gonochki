@@ -125,14 +125,15 @@ def main():
              screen.blit(self.image, (self.rect.x, self.rect.y))
 
          def update(self):
-             self.rect.y += self.yvel
+            if not pause:
+                self.rect.y += self.yvel
 
-             if self.rect.y > 1000:
-                 self.kill()
+                if self.rect.y > 1000:
+                    self.kill()
 
-             for block in blocks:
-                 if self.rect.colliderect(block.rect):
-                     self.kill()
+                for block in blocks:
+                    if self.rect.colliderect(block.rect):
+                        self.kill()
 
 
     class Explosion(pygame.sprite.Sprite):
@@ -163,10 +164,11 @@ def main():
             screen.blit(self.image, (self.rect.x, self.rect.y))
 
         def update(self):
-            self.rect.y += self.yvel
+            if not pause:
+                self.rect.y += self.yvel
 
-            if self.rect.y > 1000:
-                self.kill()
+                if self.rect.y > 1000:
+                    self.kill()
 
     x = 5
     class Car(pygame.sprite.Sprite):
@@ -190,74 +192,77 @@ def main():
                 explosion.draw(screen)
 
         def update(self, left, right, up, down, asteroids):
-            if left:
-                if self.rect.x < 80:
-                    if self == car:
-                        self.image = scale(self.img_car[0], (75, 150))
+            if not pause:
+                if left:
+                    if self.rect.x < 80:
+                        if self == car:
+                            self.image = scale(self.img_car[0], (75, 150))
+                        else:
+                            self.image = scale(self.img_car2[0], (75, 150))
+                        self.xvel = 0
                     else:
-                        self.image = scale(self.img_car2[0],(75, 150))
-                    self.xvel = 0
-                else:
-                    if self == car:
-                        self.image = scale(self.img_car[1], (75, 150))
-                    else:
-                        self.image = scale(self.img_car2[1], (75, 150))
-                    self.xvel = -5
+                        if self == car:
+                            self.image = scale(self.img_car[1], (75, 150))
+                        else:
+                            self.image = scale(self.img_car2[1], (75, 150))
+                        self.xvel = -5
 
-            if right:
-                if self.rect.x > 1133:
+                if right:
+                    if self.rect.x > 1133:
+                        if self == car:
+                            self.image = scale(self.img_car[0], (75, 150))
+                        else:
+                            self.image = scale(self.img_car2[0], (75, 150))
+                        self.xvel = 0
+                    else:
+                        if self == car:
+                            self.image = scale(self.img_car[2], (75, 150))
+                        else:
+                            self.image = scale(self.img_car2[2], (75, 150))
+                        self.xvel = 5
+
+                if up:
+                    if self.rect.y < 80:
+                        self.yvel = 0
+                    else:
+                        self.yvel = -5
+
+                if down:
+                    if self.rect.y > 703:
+                        self.yvel = 0
+                    else:
+                        self.yvel = 5
+
+                if not (left or right or up or down):
+                    self.xvel = 0
                     if self == car:
                         self.image = scale(self.img_car[0], (75, 150))
                     else:
                         self.image = scale(self.img_car2[0], (75, 150))
-                    self.xvel = 0
-                else:
-                    if self == car:
-                        self.image = scale(self.img_car[2], (75, 150))
+                    if self.rect.y > 703:
+                        self.yvel = 0
                     else:
-                        self.image = scale(self.img_car2[2], (75, 150))
-                    self.xvel = 5
+                        self.yvel = 3
+                self.rect.x += self.xvel
+                self.rect.y += self.yvel
 
-            if up:
-                if self.rect.y < 80:
-                    self.yvel = 0
-                else:
-                    self.yvel = -5
-
-            if down:
-                if self.rect.y > 703:
-                    self.yvel = 0
-                else:
-                    self.yvel = 5
-
-            if not (left or right or up or down):
-                self.xvel = 0
-                if self == car:
-                    self.image = scale(self.img_car[0], (75, 150))
-                else:
-                    self.image = scale(self.img_car2[0], (75, 150))
-                if self.rect.y > 703:
-                    self.yvel = 0
-                else:
-                    self.yvel = 3
-            self.rect.x += self.xvel
-            self.rect.y += self.yvel
-
-            for block in blocks:
-                if self.life == 0:
-                    self.dead = True
-                elif self.rect.colliderect(block.rect):
-                    self.life -= 1
-                    rx = random.randint(-5, 40)
-                    ry = random.randint(-5, 40)
-                    explosion = Explosion(self.rect.x + rx, self.rect.y + ry)
-                    self.explosions.append(explosion)
-                    block.kill()
-            for coin in coins:
-                if self.rect.colliderect(coin.rect):
-                    coin_sound.play()
-                    coin.kill()
-                    self.score += 300
+                for block in blocks:
+                    if self.life == 0:
+                        self.dead = True
+                    elif self.rect.colliderect(block.rect):
+                        self.life -= 1
+                        rx = random.randint(-5, 40)
+                        ry = random.randint(-5, 40)
+                        explosion = Explosion(self.rect.x + rx, self.rect.y + ry)
+                        self.explosions.append(explosion)
+                        block.kill()
+                for coin in coins:
+                    if self.rect.colliderect(coin.rect):
+                        coin_sound.play()
+                        coin.kill()
+                        self.score += 300
+            else:
+                pass
 
 
     car = Car(200, 750, 'car.png')
@@ -271,37 +276,43 @@ def main():
     right2 = False
     up2 = False
     down2 = False
+    pause = False
     coins =  pygame.sprite.Group()
     blocks = pygame.sprite.Group()
     pygame.font.init()
     font = pygame.font.SysFont('Comic Sans MS', 30)
     f =0
     f2 = -1024
+    ps = font.render('PAUSE', False, (0, 255, 255))
 
     # main game
     while True:
         clock.tick(80)
-        screen.blit(bg, (0, f))
-        screen.blit(bg, (0, f2))
-        if (car.score%1000 == 0) or (car2.score%1000 == 0):
-            speed += 2
-        f +=  speed
-        f2 +=  speed
-        if f > 1000:
-            f = -1024
-        if f2 > 1000:
-            f2 = -1024
-        if random.randint(1, 1000) > 960:
-            block_x = random.randint(90, 1120)
-            block_y = -10
-            block = Bushes(block_x, block_y,speed)
-            blocks.add(block)
-        if random.randint(1, 1000) > 990:
-            coin_x = random.randint(90, 920)
-            coin_y = -10
-            coin = Coins(coin_x, coin_y,speed)
-            coins.add(coin)
+        if not pause:
+            screen.blit(bg, (0, f))
+            screen.blit(bg, (0, f2))
+            if (car.score % 1000 == 0) or (car2.score % 1000 == 0):
+                speed += 2
+            f += speed
+            f2 += speed
+            if f > 1000:
+                f = -1024
+            if f2 > 1000:
+                f2 = -1024
+            if random.randint(1, 1000) > 960:
+                block_x = random.randint(90, 1120)
+                block_y = -10
+                block = Bushes(block_x, block_y, speed)
+                blocks.add(block)
+            if random.randint(1, 1000) > 990:
+                coin_x = random.randint(90, 920)
+                coin_y = -10
+                coin = Coins(coin_x, coin_y, speed)
+                coins.add(coin)
+
         for e in pygame.event.get():
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_q:
+                    pause = not pause
             if e.type == pygame.KEYDOWN and e.key == pygame.K_a:
                 left = True
                 right = False
@@ -350,22 +361,26 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-        if not car.dead:
-            car.score += 1
-            car.update(left, right, up, down, blocks)
-            car.draw(screen)
-        if not car2.dead:
-            car2.score += 1
-            car2.update(left2, right2, up2, down2, blocks)
-            car2.draw(screen)
+        if not pause:
+            if not car.dead:
+                car.score += 1
+                car.update(left, right, up, down, blocks)
+                car.draw(screen)
+            if not car2.dead:
+                car2.score += 1
+                car2.update(left2, right2, up2, down2, blocks)
+                car2.draw(screen)
 
-        for block in blocks:
-            block.update()
-            block.draw(screen)
+            for block in blocks:
+                block.update()
+                block.draw(screen)
 
-        for coin in coins:
-            coin.update()
-            coin.draw(screen)
+            for coin in coins:
+                coin.update()
+                coin.draw(screen)
+        else:
+            screen.blit(ps,(600,500))
+
 
         life = font.render('RED_LIFE: {}'.format(car.life), False, (0, 255, 255))
         life2 = font.render('BLUE_LIFE: {}'.format(car2.life), False, (0, 255, 255))

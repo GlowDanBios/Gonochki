@@ -108,9 +108,10 @@ def main():
 
     #soundtrack
     pygame.mixer.music.load('music.wav')
+    pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(-1)
     sound = pygame.mixer.Sound('gameover.wav')
-
+    coin_sound = pygame.mixer.Sound('Coin.wav')
 
     # constants classes and functions
     class Coins(pygame.sprite.Sprite):
@@ -132,7 +133,6 @@ def main():
              for block in blocks:
                  if self.rect.colliderect(block.rect):
                      self.kill()
-
 
 
     class Explosion(pygame.sprite.Sprite):
@@ -255,9 +255,9 @@ def main():
                     block.kill()
             for coin in coins:
                 if self.rect.colliderect(coin.rect):
+                    coin_sound.play()
                     coin.kill()
                     self.score += 300
-
 
 
     car = Car(200, 750, 'car.png')
@@ -384,7 +384,7 @@ def main():
                 screen.blit(score, (500, 800))
 
             pygame.display.update()
-            time.sleep(5)
+            time.sleep(3)
             break
             # pygame.quit()
         else:
